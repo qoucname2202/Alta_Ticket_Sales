@@ -24,7 +24,7 @@ const AdminTemplate = (props: Props) => {
   return (
     <div className='template container min-h-screen mx-auto pt-[17px] pb-8 px-8 bg-dashboard-background rounded-3xl'>
       <div className='wrapper flex'>
-        <div className='nav w-[13.5%] bg-red lg:w-1/5 md:hidden'>
+        <div className='nav w-[13.5%] bg-red lg:w-1/5 md:hidden relative'>
           <Link to='/'>
             <img src='/images/logo.svg' alt='' />
           </Link>
@@ -85,6 +85,11 @@ const AdminTemplate = (props: Props) => {
               </div>
             </div>
           </ul>
+          <div className='absolute bottom-0 left-0'>
+            <h4 className='font-normal text-gray-800 dark:text-gray-200 text-sm '>
+              Copyright @ 2020 Alta Software
+            </h4>
+          </div>
         </div>
         <div className='content w-[84.4%] bg-blue ml-9 lg:w-4/5 md:w-full md:ml-0 relative'>
           <div className='w-full flex items-center mb-[20px]'>
