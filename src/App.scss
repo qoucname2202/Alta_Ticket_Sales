@@ -1,0 +1,137 @@
+// import antd
+@import '~antd/dist/antd.css';
+// import tailwinds
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  body {
+    font-family: 'Montserrat', sans-serif;
+    font-size: 16px;
+    color: #1e0d03;
+  }
+}
+
+@layer components {
+  .btn {
+    @apply text-lg px-6 py-3 text-primary-200 inline-block font-bold border border-primary-200 rounded-lg;
+    &.fill {
+      @apply bg-primary-200 text-white;
+    }
+  }
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+* {
+  margin: 0;
+  padding: 0;
+}
+
+html,
+body {
+  height: 100%;
+  -webkit-font-smoothing: antialiased;
+  -webkit-tap-highlight-color: rgba(0, 0, 0, 0);
+}
+body {
+  line-height: 1.5;
+}
+
+img,
+picture,
+video,
+canvas,
+svg {
+  display: block;
+  max-width: 100%;
+}
+input,
+button,
+textarea,
+select {
+  font: inherit;
+  outline: none;
+}
+p,
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  overflow-wrap: break-word;
+}
+
+/* Other */
+.limit-1 {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  word-wrap: break-word;
+  display: -webkit-box;
+  -webkit-line-clamp: 1;
+  -webkit-box-orient: vertical;
+  flex-shrink: 0;
+}
+.limit-2 {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  word-wrap: break-word;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  flex-shrink: 0;
+}
+.limit-3 {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  word-wrap: break-word;
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  flex-shrink: 0;
+}
+.limit-4 {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  word-wrap: break-word;
+  display: -webkit-box;
+  -webkit-line-clamp: 4;
+  -webkit-box-orient: vertical;
+  flex-shrink: 0;
+}
+.-z-1 {
+  z-index: -1;
+}
+.z-9999 {
+  z-index: 9999;
+}
+
+// Custom table antd
+.ant-table-container table {
+  .ant-table-thead > tr > th {
+    background: #f1f4f8 !important;
+  }
+  .ant-table-tbody > tr:nth-child(even) {
+    background: #f7f8fb !important;
+  }
+}
+.ant-pagination-item-active {
+  border-color: #ff993c !important;
+  a {
+    color: #ff993c !important;
+  }
+}
+.ant-pagination-item:hover {
+  border-color: #ff993c !important;
+  a {
+    color: #ff993c !important;
+  }
+}
+.ant-pagination-item a:hover {
+  background: white !important;
+}
