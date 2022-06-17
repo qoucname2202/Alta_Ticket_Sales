@@ -1,4 +1,4 @@
-import { FilterIcon, SearchIcon } from '@heroicons/react/outline';
+import { SearchIcon } from '@heroicons/react/outline';
 import { Table } from 'antd';
 import React, { useEffect, useState } from 'react';
 import { AlignType } from 'rc-table/lib/interface';
