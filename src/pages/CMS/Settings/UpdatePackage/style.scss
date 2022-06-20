@@ -1,0 +1,62 @@
+.add-ticket{
+    .ant-input{
+        &:focus{
+            outline: none !important;
+            box-shadow: none !important;
+        }
+        &:hover{
+            border-color: #FF993C;
+            outline: none !important;
+            box-shadow: none !important;
+        }
+    }
+    .ant-radio-wrapper{
+        span{
+            &:nth-child(2){
+                font-size: 16px !important;
+            }
+        }
+    }
+    .ant-checkbox-wrapper{
+        span{
+            &:nth-child(2){
+                font-size: 16px !important;
+            }
+        }
+    }
+    .ant-modal-content{
+        border-radius: 16px !important;
+        padding: 24px 32px !important;
+        .ant-modal-body{
+            padding: 0;
+        }
+    }
+    .without-margin-input{
+        .ant-form-item{
+            margin-bottom: 0 !important;
+        }
+        .ant-checkbox{
+            border: 2px #27AEF9 solid;
+            border-radius: 5px;
+        }
+        .ant-checkbox-inner {
+            width: 24px;
+            height: 24px;
+        }
+        .ant-checkbox-checked .ant-checkbox-inner::after {
+            transform: rotate(45deg) scale(1) translate(-50%, -50%);
+            -webkit-transform: rotate(45deg) scale(1) translate(-50%, -50%);
+            -ms-transform: rotate(45deg) scale(1) translate(-50%, -50%);
+        }
+    }
+    .ant-select-selector{
+        border-radius: 8px !important;
+        padding: 10px 12px !important;
+        height: 44px !important;
+        font-size: 16px !important;
+        padding-top: 6px !important;
+        &::after{
+            color: #FF993C !important;
+        }
+    }
+}
