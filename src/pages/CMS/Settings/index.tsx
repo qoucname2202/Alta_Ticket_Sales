@@ -7,15 +7,61 @@ import { PencilAltIcon } from '@heroicons/react/outline';
 import moment from 'moment-timezone';
 import AddPackage from './AddPackage';
 import UpdatePackage from './UpdatePackage';
+import TicketPackageServices from '../../../db/services/ticketPackage';
+import ITicket from '../../../db/types/ticketPackage.type';
 type Props = {};
 
 const Settings = (props: Props) => {
   const searchRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const [key, setKey] = useState('');
+
   const [ticketsFilter, setTicketsFilter] = useState([]);
-  const [tickets, setTickets] = useState([]);
+  const [tickets, setTickets] = useState<ITicket[]>([]);
+
   const [isOpenModalAdd, setIsOpenModalAdd] = useState(false);
   const [isOpenModalUpdated, setIsOpenModalUpdated] = useState(false);
+
+  useEffect(() => {
+    (async () => {
+      let data = await TicketPackageServices.getTicketPackage();
+
+      data = data.map((item: any, index) => {
+        return {
+          ...item,
+          key: item.id,
+          stt: index + 1,
+        };
+      });
+      setTickets(data);
+      setTable({ ...table, data: data as any });
+    })();
+  }, [tickets]);
+
+  const removeAccents = (str: string) => {
+    var AccentsMap = [
+      'aàảãáạăằẳẵắặâầẩẫấậ',
+      'AÀẢÃÁẠĂẰẲẴẮẶÂẦẨẪẤẬ',
+      'dđ',
+      'DĐ',
+      'eèẻẽéẹêềểễếệ',
+      'EÈẺẼÉẸÊỀỂỄẾỆ',
+      'iìỉĩíị',
+      'IÌỈĨÍỊ',
+      'oòỏõóọôồổỗốộơờởỡớợ',
+      'OÒỎÕÓỌÔỒỔỖỐỘƠỜỞỠỚỢ',
+      'uùủũúụưừửữứự',
+      'UÙỦŨÚỤƯỪỬỮỨỰ',
+      'yỳỷỹýỵ',
+      'YỲỶỸÝỴ',
+    ];
+    for (var i = 0; i < AccentsMap.length; i++) {
+      var re = new RegExp('[' + AccentsMap[i].substr(1) + ']', 'g');
+      var char = AccentsMap[i][0];
+      str = str.replace(re, char);
+    }
+    return str;
+  };
+
   const [table, setTable] = useState({
     data: [],
     pagination: {
@@ -48,7 +94,7 @@ const Settings = (props: Props) => {
       width: '10%',
       align: 'right' as AlignType,
       render: (dateRelease: any) => {
-        return <span>{dateRelease.format('DD/MM/YYYY')}</span>;
+        return <span>{moment(dateRelease.toDate()).format('DD/MM/YYYY')}</span>;
       },
     },
     {
@@ -57,7 +103,7 @@ const Settings = (props: Props) => {
       width: '10%',
       align: 'right' as AlignType,
       render: (dateExpired: any) => {
-        return <span>{dateExpired.format('DD/MM/YYYY')}</span>;
+        return <span>{moment(dateExpired.toDate()).format('DD/MM/YYYY')}</span>;
       },
     },
 
@@ -80,15 +126,19 @@ const Settings = (props: Props) => {
       width: '15%',
       align: 'left' as AlignType,
       render: (fareCombo: any) => {
-        let price = fareCombo.price.toLocaleString('vi-VN', {
-          style: 'currency',
-          currency: 'VND',
-        });
-        return (
-          <span>
-            {price.substring(0, price.length - 2)} VNĐ/ {fareCombo.amount} vé
-          </span>
-        );
+        if (fareCombo) {
+          let price = fareCombo.price.toLocaleString('vi-VN', {
+            style: 'currency',
+            currency: 'VND',
+          });
+          return (
+            <span>
+              {price.substring(0, price.length - 2)} VNĐ/ {fareCombo.amount} vé
+            </span>
+          );
+        } else {
+          return '-';
+        }
       },
     },
     {
@@ -128,35 +178,11 @@ const Settings = (props: Props) => {
       ),
     },
   ];
-
-  useEffect(() => {
-    //Data demo
-    const data = [];
-
-    for (let index = 0; index < 50; index++) {
-      let random = Math.floor(Math.random() * (10 - 1 + 1) + 1);
-      let temp = {
-        key: index,
-        stt: index + 1,
-        packageCode: `ALT202105${index < 10 ? '0' + index : index}`,
-        packageName: 'Gói gia đình',
-        dateRelease: moment(),
-        dateExpired: moment().set('day', moment().get('day') + 1),
-        fare: random * 10000,
-        fareCombo: {
-          price: (random * 100000) / 2,
-          amount: 4,
-        },
-        status: index % 2 === 0 ? true : false,
-      };
-      data.push(temp);
-    }
-    setTable({ ...table, data: data as any });
-  }, []);
+  // Pagination
   const handlePanigationChange = (current: any) => {
     setTable({ ...table, pagination: { ...table.pagination, current } });
   };
-
+  // Handel Input Search
   const handleKeyWordChange = (e: any) => {
     let value = e.target.value;
     setKey(value);
@@ -164,8 +190,8 @@ const Settings = (props: Props) => {
       clearInterval(searchRef.current as any);
     }
     searchRef.current = setTimeout(() => {
-      let temp = ticketsFilter.filter((item: any) => {
-        return item.numberTicket.includes(value);
+      let temp = tickets.filter((item: any) => {
+        return item.packageCode.includes(value);
       });
       setTable({ ...table, data: temp as any });
       clearInterval(searchRef.current as any);
