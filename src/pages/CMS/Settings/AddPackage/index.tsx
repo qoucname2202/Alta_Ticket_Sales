@@ -16,16 +16,15 @@ import React, { useEffect, useState } from 'react';
 import './style.scss';
 import TicketPackageServices from '../../../../db/services/ticketPackage';
 import Swal from 'sweetalert2';
-import ITicket from '../../../../db/types/ticketPackage.type';
+// import ITicket from '../../../../db/types/ticketPackage.type';
 type Props = {
   handlePopup: Function;
   isOpen: boolean;
+  reload: Function;
 };
 const { Option } = Select;
-const AddPackage = ({ handlePopup, isOpen }: Props) => {
-  const [rules, setRules] = useState(false);
+const AddPackage = ({ handlePopup, isOpen, reload }: Props) => {
   const [isChecked, setIsChecked] = useState(false);
-  const [tickets, setTickets] = useState<ITicket[]>([]);
   const [time, setTime] = useState({
     startDay: moment(),
     endDay: moment().add(7, 'days'),
@@ -52,6 +51,7 @@ const AddPackage = ({ handlePopup, isOpen }: Props) => {
   function disabledDate(current: any) {
     return current < time.startDay;
   }
+
   // Disable timepicker
   const disableTime = () => {
     if (time.startDay.isSame(time.endDay, 'day')) {
@@ -82,42 +82,33 @@ const AddPackage = ({ handlePopup, isOpen }: Props) => {
       disabledSeconds: (selectedHour: number, selectedMinute: number) => [],
     };
   };
+  const random = () => {
+    const numb = Math.floor(1000 + Math.random() * 9000);
+    return numb;
+  };
 
-  useEffect(() => {
-    (async () => {
-      let data = await TicketPackageServices.getTicketPackage();
-      data = data.map((item: any, index) => {
-        return {
-          ...item,
-          key: item.id,
-        };
-      });
-      setTickets(data);
-    })();
-  }, []);
-
-  const onFinish = (values: any) => {
+  const onFinish = async (values: any) => {
     handlePopup(false);
     if (values.isComboTicket) {
-      TicketPackageServices.addTicketPackage({
+      await TicketPackageServices.addTicketPackage({
         dateRelease: time.startDay.toDate(),
         dateExpired: time.endDay.toDate(),
-        packageCode: 'ALT20210501',
+        packageCode: `ALT2021${random()}`,
         packageName: values.namePackage,
         fare: parseInt(values.singleTicket),
         fareCombo: {
-          price: parseInt(values.comboTicket.price),
-          amount: parseInt(values.comboTicket.amount),
+          price: Number.parseInt(values.comboTicket.price),
+          amount: Number.parseInt(values.comboTicket.amount),
         },
         status: values.tinhTrang === 'applying' ? true : false,
       });
     } else {
-      TicketPackageServices.addTicketPackage({
+      await TicketPackageServices.addTicketPackage({
         dateRelease: time.startDay.toDate(),
         dateExpired: time.endDay.toDate(),
-        packageCode: 'ALT20210501',
+        packageCode: `ALT2021${random()}`,
         packageName: values.namePackage,
-        fare: values.singleTicket,
+        fare: Number.parseInt(values.singleTicket),
         fareCombo: null as any,
         status: values.tinhTrang === 'applying' ? true : false,
       });
@@ -126,8 +117,11 @@ const AddPackage = ({ handlePopup, isOpen }: Props) => {
       title: 'Success!',
       text: 'Thêm vé mới thành công',
       icon: 'success',
-      confirmButtonText: 'Xác nhận',
+      showConfirmButton: false,
+      timer: 1200,
     });
+    reload();
+    form.resetFields();
   };
 
   const handleChangeChecbox = (e: CheckboxChangeEvent) => {
@@ -162,6 +156,7 @@ const AddPackage = ({ handlePopup, isOpen }: Props) => {
           <Input
             className='max-w-[367px] w-full py-[10px] pr-4 text-base rounded-lg focus:border-yellow/1 focus:outline-none'
             placeholder='Nhập tên gói vé'
+            autoComplete='off'
           />
         </Form.Item>
         {/* Date picker, Time picker */}
@@ -231,6 +226,7 @@ const AddPackage = ({ handlePopup, isOpen }: Props) => {
             <Input
               placeholder='Giá vé'
               className='rounded-lg bg-grey/2 outline-0 py-[10px] pl-3 max-w-[150px]'
+              autoComplete='off'
             />
           </Form.Item>
           <span className='text-base'>/ vé</span>
@@ -250,6 +246,7 @@ const AddPackage = ({ handlePopup, isOpen }: Props) => {
                 ? [
                     {
                       required: true,
+                      pattern: new RegExp(/^[0-9]*$/),
                       message: 'Vui lòng nhập giá vé',
                     },
                   ]
@@ -263,6 +260,7 @@ const AddPackage = ({ handlePopup, isOpen }: Props) => {
             <Input
               placeholder='Giá vé'
               className='rounded-lg bg-grey/2 outline-0 py-[10px] pl-3 max-w-[150px]'
+              autoComplete='off'
             />
           </Form.Item>
           <span className='text-base'>/</span>
@@ -273,6 +271,7 @@ const AddPackage = ({ handlePopup, isOpen }: Props) => {
                 ? [
                     {
                       required: true,
+                      pattern: new RegExp(/^[0-9]*$/),
                       message: 'Vui lòng nhập số lượng',
                     },
                   ]
@@ -286,6 +285,7 @@ const AddPackage = ({ handlePopup, isOpen }: Props) => {
             <Input
               placeholder='Số vé'
               className='rounded-lg bg-grey/2 outline-0 py-[10px] pl-3 max-w-[72px]'
+              autoComplete='off'
             />
           </Form.Item>
           <span className='text-base'>vé</span>

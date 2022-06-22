@@ -17,14 +17,13 @@ const Settings = (props: Props) => {
 
   const [ticketsFilter, setTicketsFilter] = useState([]);
   const [tickets, setTickets] = useState<ITicket[]>([]);
-
+  const [packageTicket, setPackageTicket] = useState<ITicket>();
   const [isOpenModalAdd, setIsOpenModalAdd] = useState(false);
   const [isOpenModalUpdated, setIsOpenModalUpdated] = useState(false);
 
   useEffect(() => {
     (async () => {
       let data = await TicketPackageServices.getTicketPackage();
-
       data = data.map((item: any, index) => {
         return {
           ...item,
@@ -35,7 +34,7 @@ const Settings = (props: Props) => {
       setTickets(data);
       setTable({ ...table, data: data as any });
     })();
-  }, [tickets]);
+  }, []);
 
   const removeAccents = (str: string) => {
     var AccentsMap = [
@@ -60,6 +59,14 @@ const Settings = (props: Props) => {
       str = str.replace(re, char);
     }
     return str;
+  };
+
+  const getTicketById = (id: string) => {
+    const idx = tickets.findIndex((item: any) => item.id === id);
+    if (idx !== -1) {
+      setPackageTicket(tickets[idx] as any);
+      setIsOpenModalUpdated(true);
+    }
   };
 
   const [table, setTable] = useState({
@@ -124,7 +131,7 @@ const Settings = (props: Props) => {
       title: 'Giá Combo (VNĐ/Combo)',
       dataIndex: 'fareCombo',
       width: '15%',
-      align: 'left' as AlignType,
+      align: 'center' as AlignType,
       render: (fareCombo: any) => {
         if (fareCombo) {
           let price = fareCombo.price.toLocaleString('vi-VN', {
@@ -168,7 +175,8 @@ const Settings = (props: Props) => {
       render: (item: any, record: any) => (
         <span
           onClick={() => {
-            handleModalUpdate();
+            // handleModalUpdate();
+            getTicketById(record.id);
           }}
           className='flex text-yellow/1 items-center gap-x-1 cursor-pointer'
         >
@@ -212,6 +220,20 @@ const Settings = (props: Props) => {
 
   const handleModalAddTicket = () => {
     setIsOpenModalAdd(true);
+  };
+  const reloadPage = () => {
+    (async () => {
+      let data = await TicketPackageServices.getTicketPackage();
+      data = data.map((item: any, index) => {
+        return {
+          ...item,
+          key: item.id,
+          stt: index + 1,
+        };
+      });
+      setTickets(data);
+      setTable({ ...table, data: data as any });
+    })();
   };
 
   return (
@@ -274,10 +296,16 @@ const Settings = (props: Props) => {
         }}
         loading={table.loading}
       />
-      <AddPackage isOpen={isOpenModalAdd} handlePopup={handleStatusAdd} />
+      <AddPackage
+        isOpen={isOpenModalAdd}
+        handlePopup={handleStatusAdd}
+        reload={reloadPage}
+      />
       <UpdatePackage
+        reload={reloadPage}
         isOpen={isOpenModalUpdated}
         handlePopup={handleStatusUpdated}
+        packageTicket={packageTicket}
       />
     </div>
   );
