@@ -1,22 +1,19 @@
-import {
-  FilterIcon,
-  SearchIcon,
-  DotsVerticalIcon,
-} from '@heroicons/react/outline';
+import { FilterIcon, SearchIcon } from '@heroicons/react/outline';
 import { Table } from 'antd';
-import React, { Fragment, useEffect, useRef, useState } from 'react';
 import { AlignType } from 'rc-table/lib/interface';
 import moment from 'moment-timezone';
+import React, { useEffect, useRef, useState } from 'react';
 import FilterTicket from './FilterTicket';
+import './style.scss';
+import { DotsVerticalIcon } from '@heroicons/react/outline';
+import ChangeDateExpire from './ChangeDateExpire';
+import TicketManagerServices from '../../../db/services/ticketManager';
+import ITicketManager from '../../../db/types/ticketManager.type';
 type Props = {};
 
 const ManagerTicket = (props: Props) => {
-  const [isOpen, setIsOpen] = useState<boolean>(false);
-  const [key, setKey] = useState('');
   const searchRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const [ticketsFilter, setTicketsFilter] = useState([]);
-  const [tickets, setTickets] = useState([]);
-  const [isOpenModalExprire, setIsOpenModalExprire] = useState<boolean>(false);
+  const [key, setKey] = useState('');
   const [table, setTable] = useState({
     data: [],
     pagination: {
@@ -25,52 +22,59 @@ const ManagerTicket = (props: Props) => {
     },
     loading: false,
   });
+  const [tickets, setTickets] = useState([]);
+  const [ticketsFilter, setTicketsFilter] = useState([]);
+  const [isOpen, setIsOpen] = useState<boolean>(false);
+  const [isOpenChangeExpire, setIsOpenChangeExpire] = useState<boolean>(false);
+  const [ticketPopup, setTicketPopup] = useState<ITicketManager>();
   const columns = [
     {
       title: 'STT',
       dataIndex: 'stt',
-      width: '3%',
-      align: 'center' as AlignType,
+      width: '5%',
     },
     {
       title: 'Booking code',
-      dataIndex: 'bookingCode',
-      width: '5%',
+      dataIndex: 'codeBooking',
+      width: '7%',
     },
     {
       title: 'Số vé',
       dataIndex: 'numberTicket',
-      width: '5%',
+      width: '7%',
     },
     {
       title: 'Tên sự kiện',
-      dataIndex: 'eventName',
-      width: '20%',
+      dataIndex: 'nameEvent',
+      width: '15%',
+      render: (nameEvent: string) => {
+        return <p className='limit-1'>{nameEvent}</p>;
+      },
     },
     {
       title: 'Tình trạng sử dụng',
       dataIndex: 'status',
-      width: '15%',
-      render: (trangThai: any) =>
-        trangThai === 'used' ? (
-          <span className='flex items-center gap-x-3 bg-grey-background w-[132px] p-3 rounded border border-solid border-grey-500'>
-            <span className='block h-2 w-2 bg-grey-500 rounded-full'></span>
-            <span className='text-grey-500 font-medium text-xs leading-[15px]'>
+      width: '10%',
+      render: (status: any) =>
+        status === 'used' ? (
+          <span className='inline-block'>
+            <span className='flex items-center  gap-x-2 px-[7px] py-2 rounded bg-grey-background text-grey/5 border border-grey/5'>
+              <span className='shrink-0 block h-2 w-2 bg-grey/5 rounded-full'></span>
               Đã sử dụng
             </span>
           </span>
-        ) : trangThai === 'expired' ? (
-          <span className='flex items-center gap-x-3 bg-grey-background w-[132px] p-3 rounded border border-solid border-primary-600'>
-            <span className='block h-2 w-2 bg-primary-600 rounded-full'></span>
-            <span className='text-primary-600 font-medium text-xs leading-[15px]'>
-              Hết hạn
+        ) : status === 'pending' ? (
+          <span className='inline-block'>
+            <span className='flex items-center gap-x-2 px-[7px] py-2 rounded bg-grey-background text-promomote border border-promomote'>
+              <span className='shrink-0 block h-2 w-2 bg-promomote rounded-full'></span>
+              Chưa sử dụng
             </span>
           </span>
         ) : (
-          <span className='flex items-center gap-x-3 bg-grey-background w-[132px] p-3 rounded border border-solid border-grey-500'>
-            <span className='block h-2 w-2 bg-green rounded-full'></span>
-            <span className='text-green font-medium text-xs leading-[15px]'>
-              Chưa sử dụng
+          <span className='inline-block'>
+            <span className='flex items-center gap-x-2 px-[7px] py-2 rounded bg-red-background text-primary-red border border-primary-red'>
+              <span className='shrink-0 block h-2 w-2 bg-primary-red rounded-full'></span>
+              Hết hạn
             </span>
           </span>
         ),
@@ -79,26 +83,34 @@ const ManagerTicket = (props: Props) => {
       title: 'Ngày sử dụng',
       dataIndex: 'dateUsed',
       width: '10%',
-      align: 'right' as AlignType,
       render: (dateUsed: any) => {
-        return <span>{dateUsed.format('DD/MM/YYYY')}</span>;
+        if (dateUsed) {
+          return <span>{moment(dateUsed.toDate()).format('DD/MM/YYYY')}</span>;
+        } else {
+          return <span className='text-lg'>-</span>;
+        }
       },
-    },
-    {
-      title: 'Ngày xuất vé',
-      dataIndex: 'dateExport',
-      width: '10%',
       align: 'right' as AlignType,
-      render: (dateExport: any) => {
-        return <span>{dateExport.format('DD/MM/YYYY')}</span>;
-      },
     },
     {
-      title: 'Cổng Check-in',
+      title: 'Hạn sử dụng',
+      dataIndex: 'dateExpired',
+      width: '10%',
+      render: (dateExpired: any) => {
+        return <span>{moment(dateExpired.toDate()).format('DD/MM/YYYY')}</span>;
+      },
+      align: 'right' as AlignType,
+    },
+    {
+      title: 'Cổng check - in',
       dataIndex: 'gateCheckin',
-      width: '15%',
-      render: (numb: any) => {
-        return <span>Cổng {numb}</span>;
+      width: '10%',
+      render: (number: any) => {
+        if (number) {
+          return <span>Cổng {number}</span>;
+        } else {
+          return <span className='text-lg'>-</span>;
+        }
       },
     },
     {
@@ -111,7 +123,7 @@ const ManagerTicket = (props: Props) => {
             <DotsVerticalIcon
               className='w-[18px] h-[36px] cursor-pointer'
               onClick={() => {
-                handlePopupExpire();
+                handlePopupExpire(record.id);
               }}
             />
           );
@@ -121,42 +133,79 @@ const ManagerTicket = (props: Props) => {
       },
     },
   ];
-
   useEffect(() => {
-    //Data demo
-    const data = [];
-    for (let index = 0; index < 50; index++) {
-      const random = Math.floor(Math.random() * (2 - 0 + 1)) + 0;
-      let temp = {
-        key: index,
-        stt: index + 1,
-        bookingCode: `ALT202105${index < 10 ? '0' + index : index}`,
-        numberTicket: '123789312749',
-        eventName: 'Hội chợ triển lãm tiêu dùng 2022',
-        status: random === 1 ? 'used' : random === 2 ? 'expired' : '',
-        dateUsed: moment(),
-        dateExport: moment().subtract(1, 'days'),
-        gateCheckin: `${random + 1}`,
-      };
-      data.push(temp);
-    }
-    setTable({ ...table, data: data as any });
+    (async () => {
+      // TicketServices.generateTickets(5)
+      let data = await TicketManagerServices.getTicketManager();
+      data = data.map((item: any, index: any) => {
+        return {
+          ...item,
+          key: item.id,
+          stt: index + 1,
+        };
+      });
+      setTickets(data as any);
+      setTicketsFilter(data as any);
+      setTable({ ...table, data: data as any });
+    })();
   }, []);
-
-  //Pagination
+  const reset = async () => {
+    let data = await TicketManagerServices.getTicketManager();
+    data = data.map((item: any, index: any) => {
+      return {
+        ...item,
+        key: item.id,
+        stt: index + 1,
+      };
+    });
+    setTickets(data as any);
+    setTicketsFilter(data as any);
+    setTable({ ...table, data: data as any });
+  };
   const handlePanigationChange = (current: any) => {
     setTable({ ...table, pagination: { ...table.pagination, current } });
   };
-  // set status modal
-  const handleStatusModal = (status: boolean): void => {
+  const handlePopupStatus = (status: boolean): void => {
     setIsOpen(status);
   };
-  // Handel Open modal
-  const handleModal = () => {
+  const handleReceiveFilter = (filterResult: any): void => {
+    let { time, tinhTrang, congCheckin } = filterResult;
+    tinhTrang = tinhTrang === 'all' ? '' : tinhTrang;
+    congCheckin = congCheckin.includes('all') ? '' : congCheckin;
+
+    let result = tickets.filter((ticket: any) => {
+      let dateUsed = ticket.dateRelease as any;
+      if (dateUsed) {
+        let isValidDate =
+          moment(dateUsed.toDate()).isBefore(time.endDay) &&
+          moment(dateUsed.toDate()).isAfter(time.startDay);
+        return (
+          ticket.status.includes(tinhTrang) &&
+          isValidDate &&
+          ticket.numberTicket.includes(key)
+        );
+      } else {
+        return false;
+      }
+    });
+    if (congCheckin.length > 0) {
+      if (!congCheckin.includes('all')) {
+        result = result.filter((ticket: any) => {
+          return (
+            congCheckin.findIndex(
+              (item: any) => +item === ticket.gateCheckin,
+            ) !== -1 && ticket.status.includes(tinhTrang)
+          );
+        });
+      }
+    }
+    setTicketsFilter(result);
+    setTable({ ...table, data: result as any });
+  };
+  const handlePopUp = () => {
     setIsOpen(true);
   };
-
-  // set handle keyword change
+  // Input Search change
   const handleKeyWordChange = (e: any) => {
     let value = e.target.value;
     setKey(value);
@@ -165,72 +214,48 @@ const ManagerTicket = (props: Props) => {
     }
     searchRef.current = setTimeout(() => {
       let temp = ticketsFilter.filter((item: any) => {
-        return item.numberTicket.includes(value);
+        return (
+          item.numberTicket.includes(value) || item.codeBooking.includes(value)
+        );
       });
       setTable({ ...table, data: temp as any });
       clearInterval(searchRef.current as any);
     }, 700);
   };
-
-  const handlePopupExpire = () => {
-    setIsOpenModalExprire(true);
-  };
-  // set status modal
-  const handleStatusExpire = (status: boolean) => {
-    setIsOpenModalExprire(status);
-  };
-  //
-  const handleReceiveFilter = (filterResult: any): void => {
-    let { time, tinhTrang, congCheckin } = filterResult;
-    tinhTrang = tinhTrang === 'all' ? '' : tinhTrang;
-    congCheckin = congCheckin.includes('all') ? '' : congCheckin;
-
-    let result = tickets.filter((ticket: any) => {
-      let isValidDate =
-        ticket.dateUsed.isBefore(time.endDay) &&
-        ticket.dateUsed.isAfter(time.startDay);
-      return (
-        ticket.status.includes(tinhTrang) &&
-        isValidDate &&
-        ticket.numberTicket.includes(key)
-      );
-    });
-
-    if (congCheckin.length > 0) {
-      if (!congCheckin.includes('all')) {
-        result = result.filter((ticket: any) => {
-          return (
-            congCheckin.includes(ticket.gateCheckin) &&
-            ticket.status.includes(tinhTrang)
-          );
-        });
-      }
+  // Handle Popup display
+  const handlePopupExpire = (id: string) => {
+    let index = tickets.findIndex((item: any) => item.id === id);
+    if (index !== -1) {
+      setTicketPopup(tickets[index]);
     }
-    setTicketsFilter(result);
-    setTable({ ...table, data: result as any });
+    setIsOpenChangeExpire(true);
+  };
+  const handleStatusExpire = (status: boolean) => {
+    setIsOpenChangeExpire(status);
   };
   return (
-    <Fragment>
+    <>
       <div className='manager-ticket'>
         <h1 className='text-4xl font-bold mb-8'>Danh sách vé</h1>
-        <div></div>
         {/* Controls */}
         <div className='flex items-center mb-8'>
           <div className='relative w-[360px]'>
             <input
+              onChange={handleKeyWordChange}
               type='text'
               placeholder='Tìm bằng số vé'
               className='py-[10px] pl-4 pr-[60px] w-[360px] bg-[#EDE6E6] rounded-xl text-base 3xl:text-sm 2xl:text-xs'
-              onChange={handleKeyWordChange}
             />
             <label className='absolute right-5 top-[10px] cursor-pointer h-6 w-6 2xl:top-[5px]'>
               <SearchIcon className='text-xl font-light 3xl:text-sm 2xl:text-xs' />
             </label>
           </div>
           <div className='flex gap-x-[10px] ml-auto'>
-            <div className='btn flex items-center cursor-pointer'>
-              <FilterIcon className='w-[26px] mr-3' onClick={handleModal} /> Lọc
-              vé
+            <div
+              className='btn flex items-center cursor-pointer'
+              onClick={handlePopUp}
+            >
+              <FilterIcon className='w-[26px] mr-3' /> Lọc vé
             </div>
             <div className='btn cursor-pointer'>Xuất file (.csv)</div>
           </div>
@@ -247,22 +272,20 @@ const ManagerTicket = (props: Props) => {
             nextIcon: (status: any) => {
               if (status.disabled) {
                 return (
-                  <i className='fa fa-caret-right text-grey-400 text-lg'></i>
+                  <i className='fa fa-caret-right text-grey/4 text-lg'></i>
                 );
               } else {
                 return (
-                  <i className='fa fa-caret-right text-primary-200 text-lg'></i>
+                  <i className='fa fa-caret-right text-yellow/1 text-lg'></i>
                 );
               }
             },
             prevIcon: (status: any) => {
               if (status.disabled) {
-                return (
-                  <i className='fa fa-caret-left text-grey-400 text-lg'></i>
-                );
+                return <i className='fa fa-caret-left text-grey/4 text-lg'></i>;
               } else {
                 return (
-                  <i className='fa fa-caret-left text-primary-200 text-lg'></i>
+                  <i className='fa fa-caret-left text-yellow/1 text-lg'></i>
                 );
               }
             },
@@ -272,10 +295,16 @@ const ManagerTicket = (props: Props) => {
       </div>
       <FilterTicket
         isOpen={isOpen}
-        handleModal={handleStatusModal}
+        handlePopup={handlePopupStatus}
         handleReceiveFilter={handleReceiveFilter}
       />
-    </Fragment>
+      <ChangeDateExpire
+        reset={reset}
+        ticket={ticketPopup}
+        isOpen={isOpenChangeExpire}
+        handlePopup={handleStatusExpire}
+      />
+    </>
   );
 };
 

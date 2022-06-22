@@ -13,12 +13,12 @@ import moment from 'moment-timezone';
 import React, { useEffect, useRef, useState } from 'react';
 import './style.scss';
 type Props = {
-  handleModal: Function;
+  handlePopup: Function;
   handleReceiveFilter: Function;
   isOpen: boolean;
 };
 
-const FilterTicket = ({ handleModal, handleReceiveFilter, isOpen }: Props) => {
+const FilterTicket = ({ handlePopup, handleReceiveFilter, isOpen }: Props) => {
   const [time, setTime] = useState({
     startDay: moment(),
     endDay: moment().add(7, 'days'),
@@ -48,7 +48,7 @@ const FilterTicket = ({ handleModal, handleReceiveFilter, isOpen }: Props) => {
   }
   const onFinish = (values: any) => {
     handleReceiveFilter({ ...values, time });
-    handleModal(false);
+    handlePopup(false);
   };
   const checkBoxOnchange = (values: any[]) => {
     //Set lại form, cập nhật checkbox status
@@ -68,7 +68,7 @@ const FilterTicket = ({ handleModal, handleReceiveFilter, isOpen }: Props) => {
       closable={false}
       footer={null}
       onCancel={() => {
-        handleModal(false);
+        handlePopup(false);
       }}
     >
       <h2 className='text-center font-bold text-2xl mb-[27px]'>Lọc vé</h2>

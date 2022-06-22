@@ -166,7 +166,6 @@ const UpdatePackage = ({
       timer: 1200,
     });
     reload();
-    form.resetFields();
     handlePopup(false);
   };
 
