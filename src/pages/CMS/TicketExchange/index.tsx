@@ -4,6 +4,8 @@ import { AlignType } from 'rc-table/lib/interface';
 import { Link } from 'react-router-dom';
 import { SearchIcon } from '@heroicons/react/outline';
 import moment from 'moment-timezone';
+import ITicket from '../../../db/types/ticketManager.type';
+import TicketManager from '../../../db/services/ticketManager';
 
 const TicketExchange = () => {
   const searchRef = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -39,7 +41,7 @@ const TicketExchange = () => {
       dataIndex: 'dateUsed',
       width: '10%',
       render: (dateUsed: any) => {
-        return <span>{dateUsed.format('DD/MM/YYYY')}</span>;
+        return <span>{moment(dateUsed.toDate()).format('DD/MM/YYYY')}</span>;
       },
       align: 'right' as AlignType,
     },
@@ -67,13 +69,13 @@ const TicketExchange = () => {
       render: (number: any, record: any) => {
         if (record.status === 'pending') {
           return (
-            <span className='font-medium text-grey/4 italic text-sm'>
+            <span className='font-medium text-grey-400 italic text-sm'>
               Chưa đối soát
             </span>
           );
         } else {
           return (
-            <span className='font-medium text-primary-red italic text-sm'>
+            <span className='font-medium text-primary-600 italic text-sm'>
               Đã đối soát
             </span>
           );
@@ -83,29 +85,22 @@ const TicketExchange = () => {
     },
   ];
   useEffect(() => {
-    //Data demo
-    const data = [];
-    for (let index = 0; index < 50; index++) {
-      let random = Math.floor(Math.random() * (2 - 0 + 1) + 0);
-      let temp = {
-        key: index,
-        stt: index,
-        codeBooking: `ALT20210501`,
-        numberTicket: '123456789034',
-        nameEvent: 'Hội chợ triển lãm tiêu dùng 2022',
-        status: random === 0 ? 'used' : random === 1 ? 'pending' : 'expired',
-        dateUsed: moment(),
-        dateRelease: moment().set('day', moment().get('day') - 1),
-        gateCheckin: `${random + 1}`,
-      };
-      data.push(temp);
-    }
-    setTickets(data as any);
-    setTicketsFilter(data as any);
-    setTable({ ...table, data: data as any });
-    form.setFieldsValue({
-      tinhTrang: 'all',
-    });
+    (async () => {
+      let data = await TicketManager.getTicketManager();
+      data = data.map((item, index) => {
+        return {
+          ...item,
+          key: index,
+          stt: index + 1,
+        };
+      });
+      setTickets(data as any);
+      setTicketsFilter(data as any);
+      setTable({ ...table, data: data as any });
+      form.setFieldsValue({
+        tinhTrang: 'all',
+      });
+    })();
   }, []);
   const handlePanigationChange = (current: any) => {
     setTable({ ...table, pagination: { ...table.pagination, current } });
@@ -147,9 +142,10 @@ const TicketExchange = () => {
     tinhTrang = tinhTrang === 'all' ? '' : tinhTrang;
 
     let result = tickets.filter((ticket: any) => {
+      let releaseDate = ticket.dateRelease as any;
       let isValidDate =
-        ticket.dateUsed.isBefore(time.endDay) &&
-        ticket.dateUsed.isAfter(time.startDay);
+        moment(releaseDate.toDate()).isBefore(time.endDay) &&
+        moment(releaseDate.toDate()).isAfter(time.startDay);
       return (
         ticket.status.includes(tinhTrang) &&
         isValidDate &&
@@ -194,20 +190,22 @@ const TicketExchange = () => {
             nextIcon: (status: any) => {
               if (status.disabled) {
                 return (
-                  <i className='fa fa-caret-right text-grey/4 text-lg'></i>
+                  <i className='fa fa-caret-right text-grey-400 text-lg'></i>
                 );
               } else {
                 return (
-                  <i className='fa fa-caret-right text-yellow/1 text-lg'></i>
+                  <i className='fa fa-caret-right text-primary-200 text-lg'></i>
                 );
               }
             },
             prevIcon: (status: any) => {
               if (status.disabled) {
-                return <i className='fa fa-caret-left text-grey/4 text-lg'></i>;
+                return (
+                  <i className='fa fa-caret-left text-grey-400 text-lg'></i>
+                );
               } else {
                 return (
-                  <i className='fa fa-caret-left text-yellow/1 text-lg'></i>
+                  <i className='fa fa-caret-left text-primary-200 text-lg'></i>
                 );
               }
             },

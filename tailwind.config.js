@@ -19,7 +19,7 @@ module.exports = {
         'grey-400': '#A5A8B1',
         'grey-500': '#919DBA',
         'grey-background': '#EAF1F8',
-        'read-background': '#F8EBE8',
+        'red-background': '#F8EBE8',
         'dashboard-background': '#F9F6F4',
         'chart-linear':
           'linear-gradient(180deg, rgba(250, 160, 95, 0.26) 0%, rgba(255, 255, 255, 0) 141.68%)',

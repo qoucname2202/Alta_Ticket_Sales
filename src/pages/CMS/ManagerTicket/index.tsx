@@ -58,22 +58,22 @@ const ManagerTicket = (props: Props) => {
       render: (status: any) =>
         status === 'used' ? (
           <span className='inline-block'>
-            <span className='flex items-center  gap-x-2 px-[7px] py-2 rounded bg-grey-background text-grey/5 border border-grey/5'>
-              <span className='shrink-0 block h-2 w-2 bg-grey/5 rounded-full'></span>
+            <span className='flex items-center  gap-x-2 px-[7px] py-2 rounded bg-grey-background text-grey-500 border border-grey-500'>
+              <span className='shrink-0 block h-2 w-2 bg-grey-500 rounded-full'></span>
               Đã sử dụng
             </span>
           </span>
         ) : status === 'pending' ? (
           <span className='inline-block'>
-            <span className='flex items-center gap-x-2 px-[7px] py-2 rounded bg-grey-background text-promomote border border-promomote'>
-              <span className='shrink-0 block h-2 w-2 bg-promomote rounded-full'></span>
+            <span className='flex items-center gap-x-2 px-[7px] py-2 rounded bg-grey-background text-green border border-green'>
+              <span className='shrink-0 block h-2 w-2 bg-green rounded-full'></span>
               Chưa sử dụng
             </span>
           </span>
         ) : (
           <span className='inline-block'>
-            <span className='flex items-center gap-x-2 px-[7px] py-2 rounded bg-red-background text-primary-red border border-primary-red'>
-              <span className='shrink-0 block h-2 w-2 bg-primary-red rounded-full'></span>
+            <span className='flex items-center gap-x-2 px-[7px] py-2 rounded bg-red-background text-primary-600 border border-primary-600'>
+              <span className='shrink-0 block h-2 w-2 bg-primary-600 rounded-full'></span>
               Hết hạn
             </span>
           </span>
@@ -272,20 +272,22 @@ const ManagerTicket = (props: Props) => {
             nextIcon: (status: any) => {
               if (status.disabled) {
                 return (
-                  <i className='fa fa-caret-right text-grey/4 text-lg'></i>
+                  <i className='fa fa-caret-right text-grey-400 text-lg'></i>
                 );
               } else {
                 return (
-                  <i className='fa fa-caret-right text-yellow/1 text-lg'></i>
+                  <i className='fa fa-caret-right text-primary-200 text-lg'></i>
                 );
               }
             },
             prevIcon: (status: any) => {
               if (status.disabled) {
-                return <i className='fa fa-caret-left text-grey/4 text-lg'></i>;
+                return (
+                  <i className='fa fa-caret-left text-grey-400 text-lg'></i>
+                );
               } else {
                 return (
-                  <i className='fa fa-caret-left text-yellow/1 text-lg'></i>
+                  <i className='fa fa-caret-left text-primary-200 text-lg'></i>
                 );
               }
             },
